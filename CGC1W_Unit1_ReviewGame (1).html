@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Disaster Zone Review — CGC1W Unit 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1a2b; --surface:#152740; --surface-2:#1c3252; --fg:#eef3fa; --muted:#8fa3bd;
+  --accent:#ff6b45; --accent-2:#2dd4bf; --good:#34d399; --bad:#f87171; --line:#2a3f5c;
+  --bonus:#c9a227;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--fg);
+  font-family:'Work Sans',-apple-system,sans-serif;
+  min-height:100vh;
+}
+h1,h2,h3,.display{font-family:'Bricolage Grotesque','Work Sans',sans-serif}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums}
+img{max-width:100%}
+[hidden]{display:none!important}
+
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 48px}
+
+header.top{
+  position:sticky; top:0; background:var(--bg);
+  padding-block:14px; border-bottom:1px solid var(--line); z-index:5;
+}
+.topRow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand .mark{
+  width:34px;height:34px;border-radius:9px;flex:none;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.brand h1{font-size:1.05rem;margin:0;line-height:1.15}
+.brand p{margin:0;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.stats{display:flex;gap:10px;flex:none}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 12px;text-align:center;min-width:64px}
+.stat .num{font-size:1.15rem;font-weight:700}
+.stat .lbl{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.progressTrack{height:6px;border-radius:99px;background:var(--surface-2);margin-top:12px;overflow:hidden}
+.progressFill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width .4s ease}
+
+.intro{padding-top:28px}
+.intro h2{font-size:1.7rem;line-height:1.15;margin:0 0 8px;text-wrap:balance}
+.intro p{color:var(--muted);margin:0 0 20px;max-width:56ch;line-height:1.55}
+.introMeta{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:22px}
+.introMeta div{font-size:.78rem;color:var(--muted)}
+.introMeta strong{display:block;color:var(--fg);font-size:1rem;font-family:'Bricolage Grotesque',sans-serif}
+
+.field{margin-bottom:14px;max-width:360px}
+.field label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.field input{
+  width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  color:var(--fg);padding:11px 13px;font-size:1rem;font-family:inherit;
+}
+.startBtn{
+  appearance:none;border:none;cursor:pointer;margin-top:10px;
+  background:var(--accent);color:#1a1208;
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:1.05rem;
+  padding:14px 26px;border-radius:12px;
+  box-shadow:0 8px 0 0 #a83d21;
+}
+.startBtn:active{transform:translateY(6px);box-shadow:0 2px 0 0 #a83d21}
+.startBtn:disabled{opacity:.5;cursor:not-allowed}
+
+.catLegend{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:20px 0 10px}
+.catLegend div{
+  font-size:.6rem;text-align:center;color:var(--fg);background:var(--surface-2);
+  border-radius:8px;padding:6px 2px;line-height:1.2;min-height:2.8em;display:flex;align-items:center;justify-content:center;
+}
+.board{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.tile{
+  aspect-ratio:1/0.72;border:1px solid var(--line);border-radius:10px;background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.2rem;
+  cursor:pointer;color:var(--accent-2);transition:transform .12s ease;
+}
+.tile:hover{transform:translateY(-2px)}
+.tile.done{background:transparent;border-style:dashed;color:var(--muted);cursor:default;opacity:.55}
+.tile.done:hover{transform:none}
+.tile.correct{color:var(--good)}
+.tile.incorrect{color:var(--bad)}
+@media (max-width:480px){
+  .catLegend, .board{grid-template-columns:repeat(5,1fr);gap:4px}
+  .catLegend div{font-size:.5rem;padding:4px 1px}
+  .tile{font-size:1rem}
+}
+
+.bonusSection{margin-top:30px;padding-top:22px;border-top:1px dashed var(--line)}
+.bonusHead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bonusHead .tag{
+  background:color-mix(in srgb, var(--bonus) 25%, transparent);color:var(--bonus);
+  font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;border-radius:99px;padding:4px 10px;font-weight:700;
+}
+.bonusHead h3{margin:0;font-size:1.05rem}
+.bonusHead p{margin:2px 0 0;color:var(--muted);font-size:.8rem}
+.bonusRow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.tile.bonus{color:var(--bonus)}
+@media (max-width:480px){.bonusRow{grid-template-columns:repeat(4,1fr)}}
+
+.qPanel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;margin-top:18px}
+.qMeta{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.qMeta .catTag{
+  font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--accent-2);
+  background:color-mix(in srgb, var(--accent-2) 14%, transparent);border-radius:99px;padding:4px 10px;
+}
+.qMeta .catTag.bonusTag{color:var(--bonus);background:color-mix(in srgb, var(--bonus) 16%, transparent)}
+.qMeta .ptTag{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:.85rem}
+.qText{font-size:1.2rem;line-height:1.4;margin:0 0 20px;font-family:'Bricolage Grotesque',sans-serif;text-wrap:balance}
+.choices{display:grid;gap:10px}
+.choice{
+  text-align:left;appearance:none;border:1px solid var(--line);background:var(--surface-2);
+  color:var(--fg);border-radius:10px;padding:13px 16px;font-size:.98rem;cursor:pointer;font-family:'Work Sans',sans-serif;line-height:1.35;
+}
+.choice:hover:not(:disabled){border-color:var(--accent-2)}
+.choice:disabled{cursor:default}
+.choice.correct{background:color-mix(in srgb, var(--good) 22%, var(--surface-2));border-color:var(--good)}
+.choice.incorrect{background:color-mix(in srgb, var(--bad) 22%, var(--surface-2));border-color:var(--bad)}
+textarea{width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;color:var(--fg);padding:12px;font-family:inherit;font-size:.95rem;resize:vertical}
+
+.feedback{margin-top:16px;padding:14px 16px;border-radius:10px;font-size:.92rem;line-height:1.5;display:none}
+.feedback.show{display:block}
+.feedback.good{background:color-mix(in srgb, var(--good) 16%, transparent);border:1px solid var(--good)}
+.feedback.bad{background:color-mix(in srgb, var(--bad) 16%, transparent);border:1px solid var(--bad)}
+.feedback.bonusfb{background:color-mix(in srgb, var(--bonus) 16%, transparent);border:1px solid var(--bonus)}
+.feedback .lead{font-weight:700;margin-bottom:4px;font-family:'Bricolage Grotesque',sans-serif}
+
+.nextBtn{
+  margin-top:16px;appearance:none;border:none;cursor:pointer;
+  background:var(--accent-2);color:#08201c;font-weight:700;
+  font-family:'Bricolage Grotesque',sans-serif;padding:11px 20px;border-radius:10px;display:none;
+}
+.nextBtn.show{display:inline-block}
+
+.end{padding-top:36px}
+.end .headline{text-align:center}
+.end .big{font-size:3rem;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;margin:6px 0}
+.end .sub{color:var(--muted);max-width:48ch;margin:0 auto 24px;line-height:1.5;text-align:center}
+.breakdown{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 18px;margin-bottom:22px}
+.bRow{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+.bRow:last-child{border-bottom:none}
+.bRow .bScore{font-family:'JetBrains Mono',monospace;font-weight:700}
+.endBtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.retryBtn, .downloadBtn{
+  appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--fg);
+  padding:12px 22px;border-radius:10px;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;cursor:pointer;
+}
+.downloadBtn{background:var(--accent);color:#1a1208;border:none}
+
+#printSheet{display:none}
+
+@media print{
+  header.top, .intro, #boardScreen, .endBtns, .end .headline > div:first-child { display:none !important; }
+  body{background:#fff;color:#111}
+  .wrap{max-width:100%;padding:0}
+  #printSheet{display:block}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="topRow">
+      <div class="brand">
+        <div class="mark">🌎</div>
+        <div><h1>Disaster Zone Review</h1><p>CGC1W · Unit 1 · 50 Marks</p></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="num mono" id="scoreNum">0</div><div class="lbl">Marks</div></div>
+        <div class="stat"><div class="num mono" id="streakNum">0</div><div class="lbl">Streak</div></div>
+        <div class="stat"><div class="num mono" id="progNum">0/20</div><div class="lbl">Done</div></div>
+      </div>
+    </div>
+    <div class="progressTrack"><div class="progressFill" id="progressFill"></div></div>
+  </header>
+
+  <main>
+    <section class="intro" id="introScreen">
+      <h2>Play your way through Unit 1.</h2>
+      <p>20 questions across 5 topics, worth 50 marks total, plus a bonus Case Study round. Pick any tile, answer, and watch your marks add up. When you're done, download your results as a PDF to hand in.</p>
+      <div class="introMeta">
+        <div><strong>5</strong>categories</div>
+        <div><strong>20</strong>questions</div>
+        <div><strong>50</strong>marks total</div>
+      </div>
+      <div class="field">
+        <label for="nameInput">Your name</label>
+        <input type="text" id="nameInput" placeholder="Full name" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="classInput">Class / Period (optional)</label>
+        <input type="text" id="classInput" placeholder="e.g., CGC1W Period 2" autocomplete="off">
+      </div>
+      <button class="startBtn" id="startBtn" disabled>Start the game →</button>
+    </section>
+
+    <section id="boardScreen" hidden>
+      <div class="catLegend" id="catLegend"></div>
+      <div class="board" id="board"></div>
+
+      <div class="bonusSection">
+        <div class="bonusHead">
+          <span class="tag">Bonus</span>
+          <div><h3>Case Study Skills</h3><p>Open research — not counted in your 50-mark total.</p></div>
+        </div>
+        <div class="bonusRow" id="bonusRow"></div>
+      </div>
+
+      <div class="qPanel" id="qPanel" hidden>
+        <div class="qMeta">
+          <span class="catTag" id="qCat"></span>
+          <span class="ptTag mono" id="qPts"></span>
+        </div>
+        <p class="qText" id="qText"></p>
+        <div class="choices" id="qChoices"></div>
+        <div class="feedback" id="qFeedback">
+          <div class="lead" id="fbLead"></div>
+          <div id="fbBody"></div>
+        </div>
+        <button class="nextBtn" id="nextBtn">Back to board →</button>
+      </div>
+    </section>
+
+    <section class="end" id="endScreen" hidden>
+      <div class="headline">
+        <div style="font-size:2.2rem">🏁</div>
+        <div class="big mono" id="finalScore">0 / 50</div>
+        <p class="sub" id="endMsg"></p>
+      </div>
+      <div class="breakdown" id="breakdown"></div>
+      <div class="endBtns">
+        <button class="downloadBtn" id="downloadBtn">Download results (PDF) →</button>
+        <button class="retryBtn" id="retryBtn">Play again</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Print-only results sheet -->
+  <div id="printSheet">
+    <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:700;margin-bottom:2px">Disaster Zone Review — Results</div>
+    <div style="font-size:13px;color:#555;margin-bottom:18px">CGC1W · Unit 1 — Natural Events & Disasters</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:18px;font-size:13px">
+      <tr><td style="padding:5px 0;width:140px;color:#555">Name</td><td style="padding:5px 0" id="pName"></td></tr>
+      <tr><td style="padding:5px 0;color:#555">Class / Period</td><td style="padding:5px 0" id="pClass"></td></tr>
+      <tr><td style="padding:5px 0;color:#555">Date</td><td style="padding:5px 0" id="pDate"></td></tr>
+      <tr><td style="padding:5px 0;color:#555">Score</td><td style="padding:5px 0;font-weight:700" id="pScore"></td></tr>
+    </table>
+    <table style="width:100%;border-collapse:collapse;font-size:13px" id="pBreakdown"></table>
+  </div>
+</div>
+
+<script>
+(function(){
+  // 5 categories, each worth 10 marks (1+2+3+4), matching the CGC1W Unit 1 Review Sheet — 50 marks total.
+  // A 6th "Case Study Skills" set is bonus and not counted in the 50.
+  var CATS = [
+    { name:"Earth's Structure & Plate Tectonics", qs:[
+      { v:1, q:"What are Earth's three main layers, from outside to inside?",
+        choices:["Crust, mantle, core","Core, mantle, crust","Mantle, crust, core","Crust, core, mantle"], correct:0,
+        why:"The crust is the thin outer layer, the mantle is the thick hot layer beneath it, and the core is the innermost, hottest layer." },
+      { v:2, q:"At a convergent plate boundary, what are the plates doing?",
+        choices:["Sliding past each other","Moving apart","Colliding / moving toward each other","Staying still"], correct:2,
+        why:"Convergent means \"coming together\" — the plates collide or move toward each other." },
+      { v:3, q:"At a transform plate boundary, what are the plates doing?",
+        choices:["Sliding past each other horizontally","Colliding head-on","Melting into the mantle","Moving apart, creating new crust"], correct:0,
+        why:"A transform boundary is where two plates grind past each other sideways, which is what causes many earthquakes." },
+      { v:4, q:"Why do most earthquakes and volcanoes happen along plate boundaries?",
+        choices:["Boundaries are colder than the rest of the crust","That's where plates interact, building pressure that gets released, or letting magma reach the surface","Boundaries have more people living near them","It's random — they could happen anywhere"], correct:1,
+        why:"Plate interaction builds up stress (released as earthquakes) and can open paths for magma to reach the surface (volcanoes)." },
+    ]},
+    { name:'Geological Hazards', qs:[
+      { v:1, q:"A tsunami is most commonly triggered by...",
+        choices:["Strong winds","An underwater earthquake","A clear, dry summer day","A full moon"], correct:1,
+        why:"An underwater earthquake can suddenly displace huge amounts of water, sending out a tsunami." },
+      { v:2, q:'What does "magnitude" measure?',
+        choices:["How many people are affected","The size/energy released by an earthquake","How long an earthquake lasts","The temperature underground"], correct:1,
+        why:"Magnitude is a fixed measurement of the energy released at the earthquake's source." },
+      { v:3, q:"A landslide is most likely to happen after...",
+        choices:["A long period of extreme cold","Heavy rain saturates a hillside","A clear, dry summer day","A full moon"], correct:1,
+        why:"Heavy rain adds weight and reduces friction in loose soil/rock on a slope, making it more likely to give way." },
+      { v:4, q:"Why can a high-magnitude earthquake in a remote area cause LESS damage than a moderate one in a city?",
+        choices:["Magnitude doesn't actually matter","Remote areas have better buildings","Impact also depends on population density, distance from the epicenter, and building quality","Cities are always built on weaker ground"], correct:2,
+        why:"Real-world impact depends on more than the raw energy released — how many people and buildings are nearby matters just as much." },
+    ]},
+    { name:'Weather vs. Climate & LOWERN', qs:[
+      { v:1, q:'Which of the following is WEATHER, not climate?',
+        choices:['"Toronto averages -5°C in January"','"It is raining right now"','"The Prairies are generally dry"','"Coastal B.C. has mild winters"'], correct:1,
+        why:"Weather is the short-term, day-to-day condition — what's happening right now." },
+      { v:2, q:"Climate is best described as...",
+        choices:["Today's temperature","The average weather pattern of a region over 30+ years","A single storm","Tomorrow's forecast"], correct:1,
+        why:"Climate looks at the long-term average pattern, not any single day." },
+      { v:3, q:"What does the LOWERN regional risk table help geographers do?",
+        choices:["Predict tomorrow's weather exactly","Compare which natural hazards different Canadian regions face most","Calculate earthquake magnitude","Track individual storms in real time"], correct:1,
+        why:"LOWERN organizes regions by the type(s) of hazard risk they typically face." },
+      { v:4, q:"Which Canadian region faces mostly earthquake/tsunami risk, and why?",
+        choices:["The Prairies, because of flat land","The B.C. coast, because it sits near an active plate boundary","Northern Canada, because of the cold","Atlantic Canada, because of hurricanes"], correct:1,
+        why:"The B.C. coast sits along the Pacific \"Ring of Fire,\" close to an active plate boundary." },
+    ]},
+    { name:'Weather-Related Hazards', qs:[
+      { v:1, q:'What is a "storm surge"?',
+        choices:["A sudden drop in temperature","A rise in sea level pushed onto the coast by a storm","A type of tornado","An underwater earthquake"], correct:1,
+        why:"Storm surge is often the most dangerous and destructive part of a hurricane." },
+      { v:2, q:"What natural hazard is a violently rotating column of air?",
+        choices:["A flood","A landslide","A tornado","A tsunami"], correct:2,
+        why:"Tornadoes can form quickly from severe thunderstorms." },
+      { v:3, q:"During Hurricane Ike (2008), what physical factor was responsible for much of the destruction?",
+        choices:["Extreme cold","The storm surge","A volcanic eruption","An earthquake"], correct:1,
+        why:"Ike's storm surge caused massive flooding and damage along the Gulf Coast." },
+      { v:4, q:"What is the safest action to take during a flood?",
+        choices:["Drive through the water quickly","Wait in a basement","Move to higher ground, and never drive or walk through flood water","Call a friend for advice first"], correct:2,
+        why:"Flood water can be deeper and faster-moving than it looks — higher ground is always safer." },
+    ]},
+    { name:'Disaster Management & Response', qs:[
+      { v:1, q:"What are the 4 stages of the Disaster Management Cycle, in order?",
+        choices:["Response, Recovery, Mitigation, Preparedness","Mitigation, Preparedness, Response, Recovery","Preparedness, Mitigation, Recovery, Response","Recovery, Response, Preparedness, Mitigation"], correct:1,
+        why:"Mitigation and Preparedness happen before a disaster; Response and Recovery happen during and after." },
+      { v:2, q:"What is the correct response during an earthquake?",
+        choices:["Run outside immediately","Drop, Cover, and Hold On","Stand in a doorway","Call for help before doing anything else"], correct:1,
+        why:'"Drop, Cover, and Hold On" protects you from falling debris, which causes most earthquake injuries.' },
+      { v:3, q:'Which of these is a "Mitigation" action?',
+        choices:["Evacuating during a hurricane","Building codes that reduce risk before any hazard happens","Repairing a home after a flood","Sounding an emergency alert"], correct:1,
+        why:"Mitigation happens before a disaster, reducing risk in advance — like stronger building codes." },
+      { v:4, q:'What is the difference between "Response" and "Recovery"?',
+        choices:["They're the same thing","Response is during/right after; Recovery is the longer-term rebuilding afterward","Response happens years later","Recovery happens before the disaster"], correct:1,
+        why:"Response is immediate action (evacuation, rescue); Recovery is the longer process of rebuilding." },
+    ]},
+  ];
+
+  var BONUS = { name:'Case Study Skills', qs:[
+    { v:0, type:'open', q:"Pick any REAL disaster you've heard of (not Hurricane Ike). What TYPE of hazard is it — geological or weather-related — and what physical cause led to it? Look it up if you're not sure.",
+      model:"A strong answer names the disaster, correctly labels it geological (plate tectonics) or weather-related (weather/climate), and gives the actual physical cause." },
+    { v:0, type:'open', q:"For that same disaster, describe ONE real human, economic, or environmental impact. Try to find an actual number or fact.",
+      model:"A strong answer gives a specific, real fact — a death toll, dollar cost, number of people displaced, or environmental effect — not just \"it was bad.\"" },
+    { v:0, type:'open', q:"How did communities respond to that disaster, during or after? Name one real Response or Recovery action.",
+      model:"A strong answer names something communities/governments actually did, and correctly labels it as Response (during/right after) or Recovery (longer-term rebuilding)." },
+    { v:0, type:'open', q:"Choose a DIFFERENT real disaster and, using all 4 questions (type, cause, impact, response), write a short case study summary in 3–4 sentences.",
+      model:"A strong answer flows through all 4 steps clearly: names the disaster, correctly identifies its type and cause, gives a specific real impact, and names a real response/recovery action." },
+  ]};
+
+  var board = document.getElementById('board');
+  var bonusRow = document.getElementById('bonusRow');
+  var catLegend = document.getElementById('catLegend');
+  var introScreen = document.getElementById('introScreen');
+  var boardScreen = document.getElementById('boardScreen');
+  var endScreen = document.getElementById('endScreen');
+  var qPanel = document.getElementById('qPanel');
+  var scoreNum = document.getElementById('scoreNum');
+  var streakNum = document.getElementById('streakNum');
+  var progNum = document.getElementById('progNum');
+  var progressFill = document.getElementById('progressFill');
+  var nameInput = document.getElementById('nameInput');
+  var classInput = document.getElementById('classInput');
+  var startBtn = document.getElementById('startBtn');
+
+  var state = { score:0, streak:0, done:0, total:0, tiles:[], bonusTiles:[], answered:{}, catScore:{} };
+
+  function buildTiles(){
+    var tiles = [];
+    var rows = CATS[0].qs.length;
+    for (var qi = 0; qi < rows; qi++){
+      CATS.forEach(function(cat, ci){
+        var item = cat.qs[qi];
+        tiles.push({ id: 'm'+ci+'-'+qi, cat: cat.name, ci: ci, v: item.v, item: item, bonus:false });
+      });
+    }
+    state.tiles = tiles;
+    state.total = tiles.length;
+    CATS.forEach(function(cat){ state.catScore[cat.name] = { earned:0, max: cat.qs.reduce(function(s,q){return s+q.v;},0) }; });
+
+    state.bonusTiles = BONUS.qs.map(function(item, qi){
+      return { id:'b'+qi, cat: BONUS.name, v: item.v, item: item, bonus:true };
+    });
+  }
+  buildTiles();
+
+  function renderLegend(){
+    catLegend.innerHTML = '';
+    CATS.forEach(function(cat){
+      var d = document.createElement('div');
+      d.textContent = cat.name;
+      catLegend.appendChild(d);
+    });
+  }
+
+  function renderBoard(){
+    board.innerHTML = '';
+    state.tiles.forEach(function(t){
+      var btn = document.createElement('button');
+      btn.className = 'tile' + (state.answered[t.id] ? ' done ' + state.answered[t.id] : '');
+      btn.textContent = state.answered[t.id] ? (state.answered[t.id] === 'correct' ? '✓' : '✕') : (t.v + (t.v===1?' mk':' mks'));
+      btn.disabled = !!state.answered[t.id];
+      btn.addEventListener('click', function(){ openQuestion(t); });
+      board.appendChild(btn);
+    });
+
+    bonusRow.innerHTML = '';
+    state.bonusTiles.forEach(function(t, i){
+      var btn = document.createElement('button');
+      btn.className = 'tile bonus' + (state.answered[t.id] ? ' done ' + state.answered[t.id] : '');
+      btn.textContent = state.answered[t.id] ? '✓' : ('Q' + (i+1));
+      btn.disabled = !!state.answered[t.id];
+      btn.addEventListener('click', function(){ openQuestion(t); });
+      bonusRow.appendChild(btn);
+    });
+  }
+
+  function updateStats(){
+    scoreNum.textContent = state.score + '/50';
+    streakNum.textContent = state.streak;
+    progNum.textContent = state.done + '/' + state.total;
+    progressFill.style.width = Math.round((state.done/state.total)*100) + '%';
+  }
+
+  function openQuestion(t){
+    qPanel.hidden = false;
+    var catEl = document.getElementById('qCat');
+    catEl.textContent = t.cat + (t.bonus ? ' (Bonus)' : '');
+    catEl.className = 'catTag' + (t.bonus ? ' bonusTag' : '');
+    document.getElementById('qPts').textContent = t.bonus ? 'not marked' : (t.v + (t.v===1?' mark':' marks'));
+    document.getElementById('qText').textContent = t.item.q;
+    var choicesEl = document.getElementById('qChoices');
+    choicesEl.innerHTML = '';
+    var fb = document.getElementById('qFeedback');
+    fb.className = 'feedback';
+    var nextBtn = document.getElementById('nextBtn');
+    nextBtn.className = 'nextBtn';
+
+    if (t.item.type === 'open') {
+      var hint = document.createElement('p');
+      hint.style.cssText = 'color:var(--muted);font-size:.82rem;margin:0 0 10px;line-height:1.5';
+      hint.textContent = 'Research this one — use your notes, textbook, or the internet. Jot your answer below, then reveal a model answer to self-check.';
+      choicesEl.appendChild(hint);
+
+      var ta = document.createElement('textarea');
+      ta.rows = 4;
+      ta.placeholder = 'Type your answer here...';
+      choicesEl.appendChild(ta);
+
+      var revealBtn = document.createElement('button');
+      revealBtn.className = 'choice';
+      revealBtn.style.cssText = 'margin-top:10px;text-align:center;font-weight:700';
+      revealBtn.textContent = 'Show model answer →';
+      revealBtn.addEventListener('click', function(){ answerOpen(t); });
+      choicesEl.appendChild(revealBtn);
+    } else {
+      t.item.choices.forEach(function(choiceText, i){
+        var b = document.createElement('button');
+        b.className = 'choice';
+        b.textContent = choiceText;
+        b.addEventListener('click', function(){ answer(t, i); });
+        choicesEl.appendChild(b);
+      });
+    }
+    qPanel.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  function closeQuestion(){
+    qPanel.hidden = true;
+    renderBoard();
+    updateStats();
+    if (state.done >= state.total + state.bonusTiles.length) { /* everything done */ }
+    if (allMainDone()) showEnd();
+    boardScreen.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  function allMainDone(){
+    return state.tiles.every(function(t){ return !!state.answered[t.id]; });
+  }
+
+  function answer(t, chosenIndex){
+    if (state.answered[t.id]) return;
+    var correct = chosenIndex === t.item.correct;
+    state.answered[t.id] = correct ? 'correct' : 'incorrect';
+    state.done += 1;
+    if (correct) {
+      state.score += t.v;
+      state.streak += 1;
+      state.catScore[t.cat].earned += t.v;
+    } else {
+      state.streak = 0;
+    }
+    updateStats();
+
+    var buttons = document.querySelectorAll('#qChoices .choice');
+    buttons.forEach(function(b, i){
+      b.disabled = true;
+      if (i === t.item.correct) b.classList.add('correct');
+      else if (i === chosenIndex) b.classList.add('incorrect');
+    });
+
+    var fb = document.getElementById('qFeedback');
+    fb.className = 'feedback show ' + (correct ? 'good' : 'bad');
+    document.getElementById('fbLead').textContent = correct ? ('Correct! +' + t.v + (t.v===1?' mark':' marks')) : 'Not quite.';
+    document.getElementById('fbBody').textContent = t.item.why;
+
+    var nextBtn = document.getElementById('nextBtn');
+    nextBtn.className = 'nextBtn show';
+    nextBtn.onclick = closeQuestion;
+  }
+
+  function answerOpen(t){
+    if (state.answered[t.id]) return;
+    state.answered[t.id] = 'correct';
+    state.done += 1;
+    updateStats();
+
+    var buttons = document.querySelectorAll('#qChoices .choice');
+    buttons.forEach(function(b){ b.disabled = true; });
+
+    var fb = document.getElementById('qFeedback');
+    fb.className = 'feedback show bonusfb';
+    document.getElementById('fbLead').textContent = 'Model answer (bonus — not marked)';
+    document.getElementById('fbBody').textContent = t.item.model;
+
+    var nextBtn = document.getElementById('nextBtn');
+    nextBtn.className = 'nextBtn show';
+    nextBtn.onclick = closeQuestion;
+  }
+
+  function showEnd(){
+    boardScreen.hidden = true;
+    endScreen.hidden = false;
+    document.getElementById('finalScore').textContent = state.score + ' / 50';
+    var pct = Math.round((state.score / 50) * 100);
+    var msg = document.getElementById('endMsg');
+    if (pct >= 80) msg.textContent = "Excellent recall — you're ready for the Unit 1 Test.";
+    else if (pct >= 55) msg.textContent = "Solid! Go back over any category where you lost marks before the test.";
+    else msg.textContent = "Good start — revisit your Unit 1 Review Sheet, then try again.";
+
+    var bd = document.getElementById('breakdown');
+    bd.innerHTML = '';
+    CATS.forEach(function(cat){
+      var row = document.createElement('div');
+      row.className = 'bRow';
+      var s = state.catScore[cat.name];
+      row.innerHTML = '<span>'+cat.name+'</span><span class="bScore mono">'+s.earned+' / '+s.max+'</span>';
+      bd.appendChild(row);
+    });
+
+    preparePrintSheet();
+  }
+
+  function preparePrintSheet(){
+    document.getElementById('pName').textContent = nameInput.value.trim() || '—';
+    document.getElementById('pClass').textContent = classInput.value.trim() || '—';
+    document.getElementById('pDate').textContent = new Date().toLocaleDateString('en-CA', { year:'numeric', month:'long', day:'numeric' });
+    document.getElementById('pScore').textContent = state.score + ' / 50 (' + Math.round((state.score/50)*100) + '%)';
+    var pbd = document.getElementById('pBreakdown');
+    pbd.innerHTML = '';
+    CATS.forEach(function(cat){
+      var s = state.catScore[cat.name];
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td style="padding:6px 0;border-top:1px solid #ddd">'+cat.name+'</td><td style="padding:6px 0;border-top:1px solid #ddd;text-align:right;font-weight:700">'+s.earned+' / '+s.max+'</td>';
+      pbd.appendChild(tr);
+    });
+  }
+
+  nameInput.addEventListener('input', function(){ startBtn.disabled = !nameInput.value.trim(); });
+
+  startBtn.addEventListener('click', function(){
+    introScreen.hidden = true;
+    boardScreen.hidden = false;
+    renderLegend();
+    renderBoard();
+    updateStats();
+  });
+
+  document.getElementById('retryBtn').addEventListener('click', function(){
+    state = { score:0, streak:0, done:0, total:state.total, tiles:state.tiles, bonusTiles:state.bonusTiles, answered:{}, catScore:{} };
+    CATS.forEach(function(cat){ state.catScore[cat.name] = { earned:0, max: cat.qs.reduce(function(s,q){return s+q.v;},0) }; });
+    endScreen.hidden = true;
+    boardScreen.hidden = false;
+    renderBoard();
+    updateStats();
+  });
+
+  document.getElementById('downloadBtn').addEventListener('click', function(){
+    window.print();
+  });
+
+  updateStats();
+})();
+</script>
+</body>
+</html>
