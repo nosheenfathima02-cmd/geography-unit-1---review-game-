@@ -92,6 +92,17 @@ header.top{
   .tile{font-size:1rem}
 }
 
+.remainingBox{margin-top:16px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.remainingTitle{margin:0 0 10px;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.remainingList{display:flex;flex-direction:column;gap:6px}
+.remainingItem{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;
+  appearance:none;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);
+  border-radius:8px;padding:9px 12px;font-size:.85rem;cursor:pointer;font-family:'Work Sans',sans-serif;
+}
+.remainingItem:hover{border-color:var(--accent-2)}
+.remainingItem .rMark{font-family:'JetBrains Mono',monospace;color:var(--accent-2);flex:none;font-size:.8rem}
+
 .bonusSection{margin-top:30px;padding-top:22px;border-top:1px dashed var(--line)}
 .bonusHead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .bonusHead .tag{
@@ -156,7 +167,7 @@ textarea{width:100%;background:var(--surface-2);border:1px solid var(--line);bor
 #printSheet{display:none}
 
 @media print{
-  header.top, .intro, #boardScreen, .endBtns, .end .headline > div:first-child { display:none !important; }
+  header.top, .intro, #boardScreen, #remainingBox, .endBtns, .end .headline > div:first-child { display:none !important; }
   body{background:#fff;color:#111}
   .wrap{max-width:100%;padding:0}
   #printSheet{display:block}
@@ -203,6 +214,11 @@ textarea{width:100%;background:var(--surface-2);border:1px solid var(--line);bor
     <section id="boardScreen" hidden>
       <div class="catLegend" id="catLegend"></div>
       <div class="board" id="board"></div>
+
+      <div id="remainingBox" class="remainingBox" hidden>
+        <p class="remainingTitle">Still to answer:</p>
+        <div id="remainingList" class="remainingList"></div>
+      </div>
 
       <div class="bonusSection">
         <div class="bonusHead">
@@ -407,6 +423,33 @@ textarea{width:100%;background:var(--surface-2);border:1px solid var(--line);bor
       btn.disabled = !!state.answered[t.id];
       btn.addEventListener('click', function(){ openQuestion(t); });
       bonusRow.appendChild(btn);
+    });
+
+    renderRemaining();
+  }
+
+  function renderRemaining(){
+    var box = document.getElementById('remainingBox');
+    var list = document.getElementById('remainingList');
+    var remaining = state.tiles.filter(function(t){ return !state.answered[t.id]; });
+    var remainingBonus = state.bonusTiles.filter(function(t){ return !state.answered[t.id]; });
+    var all = remaining.concat(remainingBonus);
+
+    if (all.length === 0) { box.hidden = true; return; }
+    box.hidden = false;
+    list.innerHTML = '';
+    all.forEach(function(t){
+      var btn = document.createElement('button');
+      btn.className = 'remainingItem';
+      var mark = document.createElement('span');
+      mark.className = 'rMark';
+      mark.textContent = t.bonus ? 'bonus' : (t.v + (t.v===1?' mk':' mks'));
+      var label = document.createElement('span');
+      label.textContent = t.cat;
+      btn.appendChild(label);
+      btn.appendChild(mark);
+      btn.addEventListener('click', function(){ openQuestion(t); });
+      list.appendChild(btn);
     });
   }
 
